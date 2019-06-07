@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://gnu.org/licenses/gpl-2.0.txt>
 
 // Flaschen Taschen Server
-
+// TODO: Add the FT_BACKEND=0 case back in (likely won't work for that case right now).
 #include <arpa/inet.h>
 #include <errno.h>
 #include <getopt.h>
@@ -33,7 +33,7 @@
 #include "led-flaschen-taschen.h"
 #include "servers.h"
 
-#if FT_BACKEND == 0
+#if FT_BACKEND == 4 || FT_BACKEND == 0
 #  include "multi-spi.h"
 #  include "led-strip.h"
 #endif
@@ -144,15 +144,23 @@ int main(int argc, char *argv[]) {
         layer_timeout = 1;
     }
 
-#if FT_BACKEND == 0
+#if FT_BACKEND == 0 || FT_BACKEND == 4
     using spixels::MultiSPI;
     using spixels::CreateWS2801Strip;
-    static const int kLedsPerCol = 7 * 25;
     MultiSPI *const spi = spixels::CreateDMAMultiSPI();
+#if FT_BACKEND == 4
+    static const int kLedsPerCol = 8 * 25;
+    ColumnWindowAssembly *display = new ColumnWindowAssembly(spi);
+#elif FT_BACKEND == 0
+    static const int kLedsPerCol = 7 * 25;
     ColumnAssembly *display = new ColumnAssembly(spi);
+#endif
 
 #define MAKE_COLUMN(port) new CrateColumnFlaschenTaschen(CreateWS2801Strip(spi, port, kLedsPerCol))
-
+#if FT_BACKEND == 4 
+// We now have a long column which snakes along the top for 9 * 25 extra
+#define MAKE_LONG_COLUMN(port)  new CrateColumnFlaschenTaschen(CreateWS2801Strip(spi, port, kLedsPerCol + (9 * 25)))
+#endif
     // Looking from the back of the display: leftmost column first.
     display->AddColumn(MAKE_COLUMN(MultiSPI::SPI_P8));
     display->AddColumn(MAKE_COLUMN(MultiSPI::SPI_P7));
@@ -163,8 +171,12 @@ int main(int argc, char *argv[]) {
     display->AddColumn(MAKE_COLUMN(MultiSPI::SPI_P13));
 
     // Rest: continue on the back part
-    display->AddColumn(MAKE_COLUMN(MultiSPI::SPI_P4));
+    display->AddColumn(MAKE_COLUMN(MultiSPI::SPI_P4)); 
+#if FT_BACKEND == 0
     display->AddColumn(MAKE_COLUMN(MultiSPI::SPI_P3));
+#elif FT_BACKEND == 4
+    display->AddColumn(MAKE_LONG_COLUMN(MultiSPI::SPI_P3));
+#endif
     display->AddColumn(MAKE_COLUMN(MultiSPI::SPI_P2));
     display->AddColumn(MAKE_COLUMN(MultiSPI::SPI_P1));
 #undef MAKE_COLUMN

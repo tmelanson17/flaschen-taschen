@@ -27,7 +27,10 @@
 #    This requires the project to be checked out with submodules
 #    (git clone --recursive)
 #
-FT_BACKEND=terminal
+# ft-window
+#    Talks to the new windowed FlaschenTaschen LED strip installation, which
+#    has the 3rd column that snakes across the top of the window
+FT_BACKEND=ft-window
 
 # Spixel related. It is checked out as as submodule in spixels/
 SPIXELS_INCDIR=spixels/include
@@ -48,6 +51,13 @@ OBJECTS=ft-thread.o udp-server.o composite-flaschen-taschen.o ppm-reader.o
 ifeq ($(FT_BACKEND), ft)
    DEFINES=-DFT_BACKEND=0
    OBJECTS+=crate-column-flaschen-taschen.o column-assembly.o
+   INCLUDES+=-I$(SPIXELS_INCDIR)
+   STATIC_LIBS+=$(SPIXELS_LIBRARY)
+endif
+
+ifeq ($(FT_BACKEND), ft-window)
+   DEFINES=-DFT_BACKEND=4
+   OBJECTS+=crate-column-flaschen-taschen.o column-window-assembly.o
    INCLUDES+=-I$(SPIXELS_INCDIR)
    STATIC_LIBS+=$(SPIXELS_LIBRARY)
 endif

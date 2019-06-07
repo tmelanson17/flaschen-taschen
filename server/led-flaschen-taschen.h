@@ -60,6 +60,34 @@ private:
     int height_;
 };
 
+// Column helps assembling the various columns of width 5 (the width of a crate)
+// to one big display. Since all SPI based strips are necessary upated in
+// parallel, that SPI send command is triggered within here.
+// This is a special version of the ColumnAssembly with a special mini window.
+class ColumnWindowAssembly : public ServerFlaschenTaschen {
+public:
+    ColumnWindowAssembly(spixels::MultiSPI *spi);
+    ~ColumnWindowAssembly();
+
+    // Add column. Takes over ownership of column.
+    // Columns have been added right to left, or, if standing
+    // behind the display: leftmost column first.
+    void AddColumn(FlaschenTaschen *taschen);
+
+    int width() const { return width_; }
+    int height() const { return height_; }
+
+    void SetPixel(int x, int y, const Color &col);
+    void Send();
+
+private:
+    spixels::MultiSPI *const spi_;
+    std::vector<FlaschenTaschen*> columns_;
+    int width_;
+    int height_;
+};
+
+
 // This represents one column. Unlike the final display,
 // x-coordinates go right-to-left, and bottom to up.
 // The final assembly will turn things around.
