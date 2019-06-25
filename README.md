@@ -19,7 +19,7 @@ make nice pixels.
 
 ![](./img/ft-completed.jpg)
 
-How about watching the [Star Wars](https://youtu.be/OEUFIpM10FE) movie ?
+How about watching [a movie](https://youtu.be/OEUFIpM10FE) ?
 
 The set-up is 9 crates wide and 7 crates high for a total of
 63 [crates (see wiring here)](./doc/wiring.md) with 25 'pixels' each
@@ -109,11 +109,11 @@ already understands that format natively, you can unleash the usual
 [netpbm] toolbox for image manipulation:
 
 ```
-bash$ jpegtopnm myimage.jpg | pnmscale -xysize 45 35 > /dev/udp/localhost/1337
+bash$ jpegtopnm myimage.jpg | stdbuf -o64k pnmscale -xysize 45 35 > /dev/udp/localhost/1337
 ```
 
 For a tool that decodes images (including animated gifs), go to
-the [clients/](./clients) sub-directory compile `send-image`
+the [client/](./client) sub-directory compile `send-image`
 (`make send-image`, see
 [Send-Image section in client/](./client/README.md#send-image) for needed
 dependencies), then run
@@ -131,10 +131,12 @@ Check out these repositories:
    ([like so](https://www.youtube.com/watch?v=s3pGp_Vf4Pk))
   * A [FlaschenTaschen VLC output](https://git.videolan.org/?p=vlc.git;a=commit;h=cf334f257868d20b6a6ce024994e84ba3e3448c3) by François Revol.
     It is already submitted upstream, but until it hits distributions, you have
-    to [compile VLC from git](https://wiki.videolan.org/UnixCompile/).
-    Then run it like so:
+    to [compile VLC from git](https://wiki.videolan.org/UnixCompile/). That VLC
+    version is >= `3.0.0-git Vetinari`.
+    Then `sudo make install ; sudo ldconfig` and run it like so:
 
    ```
+    # Here, ft.noise is the hostname of the flaschen taschen display:
     $ vlc --vout flaschen --flaschen-display=ft.noise \
           --flaschen-width=45 --flaschen-height=35 \
           <video-filename-or-YouTube-URL>
@@ -143,11 +145,10 @@ Check out these repositories:
 ## Connecting LED strips to the Pi
 
 LED strips are controlled by a Raspberry Pi, connected via
-a [custom level shifter][spixels-hardware] (provided in the separate
-[spixels] library) for up to 16 strips (of which we only use 9 for our
-installation right now):
+a [custom level shifter](./hardware) for up to 16 strips
+(of which we only need 9 for our installation right now).
 
-<a href="https://github.com/hzeller/spixels/tree/master/hardware"><img src="img/pi-adapter-pcb.png" width="200px"></a>
+<a href="hardware"><img src="img/pi-adapter-pcb.png" width="200px"></a>
 
 [FlaschenTaschen]: https://noisebridge.net/wiki/Flaschen_Taschen
 [Muro de botellas]: http://www.zuloark.com/muro-de-botellas/
@@ -158,6 +159,4 @@ installation right now):
 [netpbm]: http://netpbm.sourceforge.net/
 [2025-video]: https://www.youtube.com/watch?v=hs8FoROzE4M
 [7of9-video]: https://www.youtube.com/watch?v=Uc2-8ntcEpY
-[spixels-hardware]: https://github.com/hzeller/spixels/tree/master/hardware
-[spixels]: http://spixels.org/
 [VLC]: https://www.videolan.org/

@@ -117,8 +117,8 @@ class RGBMatrix;
 
 class RGBMatrixFlaschenTaschen : public ServerFlaschenTaschen {
 public:
-    RGBMatrixFlaschenTaschen(int offset_x, int offset_y,
-                             int width, int heigh);
+    RGBMatrixFlaschenTaschen(rgb_matrix::RGBMatrix *matrix,
+                             int width, int height);
     virtual ~RGBMatrixFlaschenTaschen();
 
     virtual void PostDaemonInit();  // Starting threads.
@@ -130,12 +130,10 @@ public:
     void Send() { /* update directly */ }
 
 private:
-    const int off_x_;
-    const int off_y_;
-    const int width_;
-    const int height_;
+    rgb_matrix::RGBMatrix *const matrix_;
 
-    rgb_matrix::RGBMatrix *matrix_;
+    int width_;
+    int height_;
 };
 
 class TerminalFlaschenTaschen : public ServerFlaschenTaschen {

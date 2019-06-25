@@ -19,7 +19,8 @@
 # terminal
 #     Very simple output to current terminal. Requires decent terminal
 #     implementation that understands ANSI color escapes. Known terminals to
-#     work are konsole or xterm works. Gnome terminal does not.
+#     work are konsole or xterm. Newer Gnome terminals as well.
+#     Requires iTerm2 > 3.0 on Mac.
 #
 # rgb-matrix
 #    Output things to a LED matrix
@@ -90,10 +91,10 @@ ft-server: main.o $(OBJECTS) $(STATIC_LIBS)
 %.o : %.c .compiler-flags
 	$(CC) $(CXXFLAGS) -c -o $@ $<
 
-$(RGB_LIBRARY):
+$(RGB_LIBRARY): FORCE
 	$(MAKE) -C $(RGB_LIBDIR)
 
-$(SPIXELS_LIBRARY):
+$(SPIXELS_LIBRARY): FORCE
 	$(MAKE) -C $(SPIXELS_LIBDIR)
 
 # Make sure to re-compile when the compiler flags change.

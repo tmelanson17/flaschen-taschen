@@ -17,7 +17,7 @@ import socket
 class Flaschen(object):
   '''A Framebuffer display interface that sends a frame via UDP.'''
 
-  def __init__(self, host, port, width, height, layer=0, transparent=False):
+  def __init__(self, host, port, width, height, layer=5, transparent=False):
     '''
 
     Args:
@@ -36,10 +36,10 @@ class Flaschen(object):
     self._sock.connect((host, port))
     header = ''.join(["P6\n",
                       "%d %d\n" % (self.width, self.height),
-                      "255\n"])
+                      "255\n"]).encode('utf-8')
     footer = ''.join(["0\n",
                       "0\n",
-                      "%d\n" % self.layer])
+                      "%d\n" % self.layer]).encode('utf-8')
     self._data = bytearray(width * height * 3 + len(header) + len(footer))
     self._data[0:len(header)] = header
     self._data[-1 * len(footer):] = footer

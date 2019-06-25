@@ -17,22 +17,18 @@
 #include "led-matrix.h"
 #include "gpio.h"
 #include <stdio.h>
-
-// We can simulate the spacing between crates by having an extra dark pixel
-// in-between. It is not quite perfect, but the actual spacing on the real
-// FlaschenTaschen crates is more like 3/4 of a bottle, but probably more
-// 'honest' than ignoring the spacing.
-#define CRATE_SPACING 1
+#include <stdlib.h>
 
 static rgb_matrix::GPIO gpio_s;
 
-RGBMatrixFlaschenTaschen::RGBMatrixFlaschenTaschen(int offset_x, int offset_y,
-                                                   int width, int height)
-    : off_x_(offset_x), off_y_(offset_y), width_(width), height_(height) {
-    gpio_s.Init();
-    matrix_ = new rgb_matrix::RGBMatrix(NULL, 32, 1, 2);
-    // Initialize all GPIO pins, but don't start thread yet.
-    matrix_->SetGPIO(&gpio_s, false);
+RGBMatrixFlaschenTaschen::RGBMatrixFlaschenTaschen(
+    rgb_matrix::RGBMatrix *matrix, int width, int height) : matrix_(matrix) {
+    if (matrix_ == NULL) {
+        fprintf(stderr, "Couldn't initialize RGB matrix.\n");
+        exit(1);
+    }
+    width_ = (width > 0) ? width : matrix_->width();
+    height_ = (height > 0) ? height : matrix_->height();
 }
 
 RGBMatrixFlaschenTaschen::~RGBMatrixFlaschenTaschen() {
@@ -40,15 +36,9 @@ RGBMatrixFlaschenTaschen::~RGBMatrixFlaschenTaschen() {
 }
 
 void RGBMatrixFlaschenTaschen::SetPixel(int x, int y, const Color &col) {
-#if CRATE_SPACING
-    // Simulate spacing of crates. One extra pixel every 5 pixels.
-    x += x / 5;
-    y += y / 5;
-#endif
-    //matrix_->SetPixel(x + off_x_, y + off_y_, col.r, col.g, col.b);
-    matrix_->SetPixel(31 - y + off_y_, x + off_x_, col.r, col.g, col.b);
+    matrix_->SetPixel(x, y, col.r, col.g, col.b);
 }
 
 void RGBMatrixFlaschenTaschen::PostDaemonInit() {
-    matrix_->SetGPIO(&gpio_s, true);  // Start thread.
+    matrix_->StartRefresh();  // Starts thread.
 }
